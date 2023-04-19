@@ -134,13 +134,13 @@ class EasySearchBar extends StatefulWidget implements PreferredSizeWidget {
         super(key: key);
 
   @override
-  State<EasySearchBar> createState() => _EasySearchBarState();
+  State<EasySearchBar> createState() => EasySearchBarState();
 
   @override
   Size get preferredSize => Size.fromHeight(appBarHeight + (isFloating ? 5 : 0));
 }
 
-class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMixin {
+class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMixin {
   final LayerLink _layerLink = LayerLink();
   bool _hasOpenedOverlay = false;
   bool _isLoading = false;
@@ -150,7 +150,7 @@ class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateM
   String _previousAsyncSearchText = '';
   final FocusNode _focusNode = FocusNode();
 
-  late AnimationController _controller;
+  late AnimationController controller;
   late Animation _containerSizeAnimation;
   late Animation _containerBorderRadiusAnimation;
   late Animation _textFieldOpacityAnimation;
@@ -159,25 +159,25 @@ class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    controller = AnimationController(
       vsync:  this ,
       duration: widget.animationDuration
     );
     _containerSizeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: const Interval(0.0, 0.55, curve: Curves.easeIn),
       ),
     );
     _containerBorderRadiusAnimation = Tween<double>(begin: 1, end: 0).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: const Interval(0.0, 0.55, curve: Curves.easeIn),
       )
     );
     _textFieldOpacityAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: controller,
         curve: const Interval(0.45, 1, curve: Curves.easeIn),
       )
     );
@@ -440,7 +440,7 @@ class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateM
                                           icon: const Icon(Icons.search),
                                           iconSize: iconTheme.size ?? 24,
                                           onPressed: () {
-                                            _controller.forward();
+                                            controller.forward();
                                             _focusNode.requestFocus();
 
                                             if (widget.openOverlayOnSearch) {
@@ -464,7 +464,7 @@ class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateM
                               right: 0,
                               top: 0,
                               child: AnimatedBuilder(
-                                animation: _controller,
+                                animation: controller,
                                 builder: (context, child) {
                                   return Container(
                                     alignment: Alignment.center,
@@ -513,7 +513,7 @@ class _EasySearchBarState extends State<EasySearchBar> with TickerProviderStateM
                                                 Icons.arrow_back_outlined
                                               ),
                                               onPressed: () {
-                                                _controller.reverse();
+                                                controller.reverse();
                                                 _searchController.clear();
                                                 widget.onSearch(_searchController.text);
                                                 _focusNode.unfocus();
