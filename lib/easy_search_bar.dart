@@ -98,6 +98,8 @@ class EasySearchBar extends StatefulWidget implements PreferredSizeWidget {
   /// Can be used to set the debounce time for async data fetch
   final Duration debounceDuration;
 
+  final TextDirection textDirection;
+
   const EasySearchBar({
     Key? key,
     required this.title,
@@ -129,7 +131,8 @@ class EasySearchBar extends StatefulWidget implements PreferredSizeWidget {
     this.suggestionBackgroundColor,
     this.animationDuration = const Duration(milliseconds: 450),
     this.debounceDuration = const Duration(milliseconds: 400),
-    this.searchTextKeyboardType = TextInputType.text
+    this.searchTextKeyboardType = TextInputType.text,
+    this.textDirection = TextDirection.ltr,
   }) : assert(elevation == null || elevation >= 0.0),
         super(key: key);
 
@@ -148,7 +151,7 @@ class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMi
   List<String> _suggestions = [];
   Timer? _debounce;
   String _previousAsyncSearchText = '';
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
 
   late AnimationController controller;
   late Animation _containerSizeAnimation;
@@ -182,7 +185,7 @@ class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMi
       )
     );
     _searchController.addListener(() async {
-      if (_focusNode.hasFocus) {
+      if (focusNode.hasFocus) {
         widget.onSearch(_searchController.text);
         if (widget.suggestions != null) {
           openOverlay();
@@ -441,7 +444,7 @@ class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMi
                                           iconSize: iconTheme.size ?? 24,
                                           onPressed: () {
                                             controller.forward();
-                                            _focusNode.requestFocus();
+                                            focusNode.requestFocus();
 
                                             if (widget.openOverlayOnSearch) {
                                               openOverlay();
@@ -481,47 +484,51 @@ class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMi
                                     ),
                                     child: Opacity(
                                       opacity: _textFieldOpacityAnimation.value,
-                                      child: TextField(
-                                        onSubmitted: (value) {
-                                          widget.onSearch(_searchController.text);
-                                          _focusNode.unfocus();
-                                          closeOverlay();
-                                        },
-                                        maxLines: 1,
-                                        controller: _searchController,
-                                        textInputAction: TextInputAction.search,
-                                        cursorColor: cursorColor,
-                                        focusNode: _focusNode,
-                                        textAlignVertical: TextAlignVertical.center,
-                                        style: widget.searchTextStyle,
-                                        keyboardType: widget.searchTextKeyboardType,
-                                        decoration: InputDecoration(
-                                          contentPadding: const EdgeInsets.only(
-                                            left: 20,
-                                            right: 10
-                                          ),
-                                          fillColor: searchBackgroundColor,
-                                          filled: true,
-                                          hintText: widget.searchHintText,
-                                          hintMaxLines: 1,
-                                          hintStyle: searchHintStyle,
-                                          border: InputBorder.none,
-                                          prefixIcon: IconTheme(
-                                            data: searchIconTheme,
-                                            child: IconButton(
-                                              icon: const Icon(
-                                                Icons.arrow_back_outlined
-                                              ),
-                                              onPressed: () {
-                                                controller.reverse();
-                                                _searchController.clear();
-                                                widget.onSearch(_searchController.text);
-                                                _focusNode.unfocus();
-                                                closeOverlay();
-                                              }
+                                      child: Directionality(
+                                        textDirection: widget.textDirection,
+                                        child: TextField(
+                                          onSubmitted: (value) {
+                                            widget.onSearch(_searchController.text);
+                                            focusNode.unfocus();
+                                            closeOverlay();
+                                          },
+                                          maxLines: 1,
+                                          controller: _searchController,
+                                          textInputAction: TextInputAction.search,
+                                          cursorColor: cursorColor,
+                                          focusNode: focusNode,
+                                          textAlignVertical: TextAlignVertical.center,
+                                          style: widget.searchTextStyle,
+                                          keyboardType: widget.searchTextKeyboardType,
+                                          decoration: InputDecoration(
+
+                                            contentPadding: const EdgeInsets.only(
+                                              left: 20,
+                                              right: 10
+                                            ),
+                                            fillColor: searchBackgroundColor,
+                                            filled: true,
+                                            hintText: widget.searchHintText,
+                                            hintMaxLines: 1,
+                                            hintStyle: searchHintStyle,
+                                            border: InputBorder.none,
+                                            prefixIcon: IconTheme(
+                                              data: searchIconTheme,
+                                              child: IconButton(
+                                                icon: const Icon(
+                                                  Icons.arrow_back_outlined
+                                                ),
+                                                onPressed: () {
+                                                  controller.reverse();
+                                                  _searchController.clear();
+                                                  widget.onSearch(_searchController.text);
+                                                  focusNode.unfocus();
+                                                  closeOverlay();
+                                                }
+                                              )
                                             )
                                           )
-                                        )
+                                        ),
                                       )
                                     )
                                   );
@@ -544,7 +551,7 @@ class EasySearchBarState extends State<EasySearchBar> with TickerProviderStateMi
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    focusNode.dispose();
     _searchController.dispose();
     super.dispose();
   }
